@@ -1,0 +1,36 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.list {
+  margin: 30px auto;
+
+}
+
+.list ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.list li {
+  text-align: left;
+  margin: 0 10px 10px 0;
+  padding: 3px 6px;
+  list-style: none;
+  border: 1px solid #ccc;
+  background-color: #efefef;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.list li svg {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
