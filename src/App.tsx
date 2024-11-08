@@ -152,9 +152,10 @@ const App = () => {
     if (uploadFinishedCnt.current === uploadingFilesCnt) {
       onAllFilesUploaded();
     } else {
-      if (uploadStartedCnt.current < uploadingFilesCnt) {
-        sendSingleFile(uploadingFiles.current[uploadStartedCnt.current]);
-      }
+      const uploadingCnt = uploadStartedCnt.current - uploadFinishedCnt.current;
+      const newReqCnt = CHUNK_PROMISES_CNT - Math.abs(uploadingCnt);
+      const sliced = uploadingFiles.current.slice(uploadStartedCnt.current, uploadStartedCnt.current + newReqCnt);
+      sliced.forEach(f => sendSingleFile(f));
     }
   }
 
