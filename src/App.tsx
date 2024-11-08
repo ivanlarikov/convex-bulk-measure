@@ -137,6 +137,7 @@ const App = () => {
         await updateStorageId({ id, storageId });
 
         uploadFinishedCnt.current++;
+        console.log('uploadFinishedCnt.current', uploadFinishedCnt.current);
         setUploadedFilesCnt(uploadFinishedCnt.current);
         onSingleFileUploaded(storageId);
         resolve(storageId);
@@ -155,6 +156,7 @@ const App = () => {
       const uploadingCnt = uploadStartedCnt.current - uploadFinishedCnt.current;
       const newReqCnt = CHUNK_PROMISES_CNT - Math.abs(uploadingCnt);
       const sliced = uploadingFiles.current.slice(uploadStartedCnt.current, uploadStartedCnt.current + newReqCnt);
+      console.log('sliced', uploadStartedCnt.current, uploadStartedCnt.current + newReqCnt);
       sliced.forEach(f => sendSingleFile(f));
     }
   }
