@@ -175,6 +175,9 @@ const App = () => {
   }
 
   const formatTime = (time) => {
+    if (!time) {
+      return time;
+    }
     const ms = ((time % 1000) / 1000).toFixed(3);
     return moment(time).format('HH:mm:ss') + ms.substring(1); 
   }
