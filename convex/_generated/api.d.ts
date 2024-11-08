@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as actions_fileActions from "../actions/fileActions.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as httpActions_uploadFileAction from "../httpActions/uploadFileAction.js";
@@ -27,6 +28,7 @@ import type * as httpActions_uploadMultiFilesAction from "../httpActions/uploadM
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "actions/fileActions": typeof actions_fileActions;
   files: typeof files;
   http: typeof http;
   "httpActions/uploadFileAction": typeof httpActions_uploadFileAction;

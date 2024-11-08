@@ -65,7 +65,7 @@ input {
 }
 
 .table tbody tr:hover {
-  background-color: #efefef;
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .table td {

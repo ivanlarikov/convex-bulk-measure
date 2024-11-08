@@ -1,6 +1,6 @@
 import "./App.css";
 import { FormEvent, useRef, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
 
 const App = () => {
@@ -8,16 +8,17 @@ const App = () => {
   const CHUNK_PROMISES_CNT = 16;
 
   const files = useQuery(api.files.get);
-  const removeAllFiles = useMutation(api.files.removeAll)
-  const updateStorageId = useMutation(api.files.updateStorageId)
-  const saveMultiRecords = useMutation(api.files.saveMulti)
+  const removeAllFiles = useMutation(api.files.removeAll);
+  const saveMultiRecords = useMutation(api.files.saveMulti);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const updateStorageId = useMutation(api.files.updateStorageId);
+  const setJobStart = useAction(api.actions.fileActions.setJobStart);
+  const setJobEnd = useAction(api.actions.fileActions.setJobEnd);
 
 
   const imageInput = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<any[] | null>(null);
   const [stage, setStage] = useState<string>('');
-  const [requestsCnt, setRequestsCnt] = useState<number>(0);
   const [uploadedFilesCnt, setUploadedFilesCnt] = useState<number>(0);
   const [elpasedSeconds, setElapsedSeconds] = useState<number>(0);
 
@@ -25,7 +26,8 @@ const App = () => {
   const uploadStartedCnt = useRef<number>(0);
   const uploadFinishedCnt = useRef<number>(0);
   const timer = useRef<number>(0);
-  
+  const uploadingFiles = useRef<any[]>([]);
+
   const onSelectFiles = (event: any) => {
     const target = event.target as HTMLInputElement;
     if (target.files) {
@@ -61,18 +63,17 @@ const App = () => {
       return;
     }
 
-    removeAll();
+    await removeAll();
 
     startTimer();
 
-    addAll();
+    await addAll();
 
     setStage('upload');
-    setRequestsCnt(0);
     setUploadedFilesCnt(0);
     uploadStartedCnt.current = 0;
     uploadFinishedCnt.current = 0;
-    
+
     // Split all requests to chunk promises
     // const remainingFiles = [...selectedFiles];
     // Split promises
@@ -82,8 +83,7 @@ const App = () => {
     //   console.log(spliced);
     //   await Promise.all(spliced.map(f => sendSingleFile(f)));
     // }
-    const sliced = selectedFiles.slice(0, CHUNK_PROMISES_CNT);
-    setRequestsCnt(prev => prev + sliced.length);
+    const sliced = uploadingFiles.current.slice(0, CHUNK_PROMISES_CNT);
     sliced.forEach(f => sendSingleFile(f));
   }
 
@@ -110,11 +110,10 @@ const App = () => {
     }));
     try {
       const newIds = await saveMultiRecords({data: rows});
-      const newSelectedFiles = selectedFiles.map((f, index) => {
+      uploadingFiles.current = selectedFiles.map((f, index) => {
         f.id = newIds[index];
         return f;
       });
-      setSelectedFiles(newSelectedFiles);
     } catch (err) {
       console.error(err);
     }
@@ -124,15 +123,24 @@ const App = () => {
     return new Promise(async (resolve, reject) => {
       try {
         uploadStartedCnt.current++;
+
+        const { id, file } = f;
+
+        await setJobStart({id, jobName: "upload"});
         const postUrl = await generateUploadUrl();
         const result = await fetch(postUrl, {
           method: "POST",
-          headers: { "Content-Type": f.file.type },
-          body: f.file,
+          headers: { "Content-Type": file.type },
+          body: file,
         });
+        await setJobEnd({id, jobName: "upload"});
+
         const { storageId } = await result.json();
-        await updateStorageId({ storageId, id: f.id });
+        await setJobStart({id, jobName: "updateStorageId"});
+        await updateStorageId({ id, storageId });
+        await setJobEnd({id, jobName: "updateStorageId"});
         setUploadedFilesCnt(prev => prev + 1);
+
         uploadFinishedCnt.current++;
         onSingleFileUploaded(storageId);
         resolve(storageId);
@@ -143,15 +151,12 @@ const App = () => {
   }
 
   const onSingleFileUploaded = (storageId: string) => {
-    if (selectedFiles === null) {
-      return;
-    }
-    console.log(uploadStartedCnt.current, uploadFinishedCnt.current, selectedFiles.length)
-    if (uploadFinishedCnt.current === selectedFiles.length) {
+    const uploadingFilesCnt = uploadingFiles.current.length;
+    if (uploadFinishedCnt.current === uploadingFilesCnt) {
       onAllFilesUploaded();
     } else {
-      if (uploadStartedCnt.current < selectedFiles.length) {
-        sendSingleFile(selectedFiles[uploadStartedCnt.current]);
+      if (uploadStartedCnt.current < uploadingFilesCnt) {
+        sendSingleFile(uploadingFiles.current[uploadStartedCnt.current]);
       }
     }
   }
@@ -205,27 +210,23 @@ const App = () => {
             Elapsed Time: {formatDisplayTime(elpasedSeconds)}
           </div>
         )}
-        
+
         <h1>Total files: {files?.length}</h1>
         <div className="table-responsive">
-          <table class="table">
+          <table className="table">
             <thead>
               <tr>
-                <th rowSpan="2">No</th>
-                <th rowSpan="2">Created</th>
-                <th rowSpan="2">FileName</th>
-                <th colSpan="3">Upload</th>
-                <th colSpan="3">SaveToStorage</th>
-                <th colSpan="3">UpdateStorageId</th>
-                <th colSpan="3">GetFileType</th>
-                <th colSpan="3">GetFileSize</th>
-                <th colSpan="3">GetTotalSize</th>
-                <th rowSpan="2">TotalSize</th>
+                <th rowSpan={2}>No</th>
+                <th rowSpan={2}>Created</th>
+                <th rowSpan={2}>FileName</th>
+                <th colSpan={3}>Upload and SaveToStorage</th>
+                <th colSpan={3}>UpdateStorageId</th>
+                <th colSpan={3}>GetFileType</th>
+                <th colSpan={3}>GetFileSize</th>
+                <th colSpan={3}>GetTotalSize</th>
+                <th rowSpan={2}>TotalSize</th>
               </tr>
               <tr>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
                 <th>Start</th>
                 <th>End</th>
                 <th>Status</th>
@@ -245,16 +246,13 @@ const App = () => {
             </thead>
             <tbody>
               {files?.map((row, index) => (
-                <tr>
+                <tr key={index}>
                   <td>{index + 1}</td>
                   <td>{row._creationTime}</td>
                   <td>{row.fileName}</td>
                   <td>{row.uploadStart}</td>
                   <td>{row.uploadEnd}</td>
                   <td>{row.upload || 'Waiting'}</td>
-                  <td>{row.toStorageStart}</td>
-                  <td>{row.toStorageEnd}</td>
-                  <td>{row.toStorage || 'Waiting'}</td>
                   <td>{row.updateStorageIdStart}</td>
                   <td>{row.updateStorageIdEnd}</td>
                   <td>{row.updateStorageId || 'Waiting'}</td>

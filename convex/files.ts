@@ -52,24 +52,15 @@ export const saveMulti = mutation({
   },
 });
 
-const getHrTime = () => {
-  const hrTime = process.hrtime();
-  return hrTime[0] * 1000000 + hrTime[1] / 1000;
-};
-
 export const updateStorageId = mutation({
   args: {
     storageId: v.id("_storage"),
     id: v.id("files")
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, { updateStorageId: 'Running', updateStorageIdStart: getHrTime() });
     await ctx.db.patch(args.id, { storageId: args.storageId });
-    await ctx.db.patch(args.id, { updateStorageId: 'Done', updateStorageIdEnd: getHrTime() });
   },
 });
-
-
 
 export const removeAll = mutation({
   args: {  },
@@ -82,4 +73,50 @@ export const removeAll = mutation({
       await ctx.db.delete(doc._id);
     }
   },
+});
+
+export const setJobStart = mutation({
+  args: {
+    jobName: v.string(),
+    time: v.number(),
+    id: v.id("files")
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      [args.jobName]: "Running",
+      [args.jobName + "Start"]: args.time
+    });
+    // await ctx.db.patch(args.id, { storageId: args.storageId });
+  },
+});
+
+export const setJobEnd = mutation({
+  args: {
+    jobName: v.string(),
+    time: v.number(),
+    id: v.id("files")
+  },
+  handler: async (ctx, args) => {
+    try {
+      await ctx.db.patch(args.id, {
+        [args.jobName]: "Done",
+        [args.jobName + "End"]: args.time
+      });
+    } catch (err) {
+      await ctx.db.patch(args.id, {
+        [args.jobName]: "Failed",
+        [args.jobName + "End"]: args.time
+      });
+    }
+  },
+});
+
+export const updateRow = mutation({
+  args: {
+    id: v.id("files"),
+    data: v.any()
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, args.data);
+  }
 });
