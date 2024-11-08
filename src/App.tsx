@@ -1,6 +1,7 @@
 import "./App.css";
 import { FormEvent, useRef, useState } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
+import moment from 'moment';
 import { api } from "../convex/_generated/api";
 
 const App = () => {
@@ -173,6 +174,11 @@ const App = () => {
     setUploadedFilesCnt(0);
   }
 
+  const formatTime = (time) => {
+    const ms = ((time % 1000) / 1000).toFixed(3);
+    return moment(time).format('HH:mm:ss') + ms.substring(1); 
+  }
+
   const requestsInProgress = uploadStartedCnt.current - uploadFinishedCnt.current;
 
   return (
@@ -221,9 +227,9 @@ const App = () => {
                 <th colSpan={3}>UpdateStorageId</th>
                 <th colSpan={3}>GetFileType</th>
                 <th colSpan={3}>GetFileSize</th>
-                <th rowSpan={2} width="80px">FileSize</th>
+                <th rowSpan={2} width="80px">FileSize<br/>(bytes)</th>
                 <th colSpan={3}>GetTotalSize</th>
-                <th rowSpan={2} width="80px">TotalSize</th>
+                <th rowSpan={2} width="80px">TotalSize<br/>(bytes)</th>
               </tr>
               <tr>
                 <th width="100px">Start</th>
@@ -247,23 +253,23 @@ const App = () => {
               {files?.map((row, index) => (
                 <tr key={index}>
                   <td>{index + 1}</td>
-                  <td>{row._creationTime}</td>
+                  <td>{formatTime(row._creationTime)}</td>
                   <td>{row.fileName}</td>
-                  <td>{row.uploadStart}</td>
-                  <td>{row.uploadEnd}</td>
+                  <td>{formatTime(row.uploadStart)}</td>
+                  <td>{formatTime(row.uploadEnd)}</td>
                   <td>{row.upload || 'Waiting'}</td>
-                  <td>{row.updateStorageIdStart}</td>
-                  <td>{row.updateStorageIdEnd}</td>
+                  <td>{formatTime(row.updateStorageIdStart)}</td>
+                  <td>{formatTime(row.updateStorageIdEnd)}</td>
                   <td>{row.updateStorageId || 'Waiting'}</td>
-                  <td>{row.getFileTypeStart}</td>
-                  <td>{row.getFileTypeEnd}</td>
+                  <td>{formatTime(row.getFileTypeStart)}</td>
+                  <td>{formatTime(row.getFileTypeEnd)}</td>
                   <td>{row.getFileType || 'Waiting'}</td>
-                  <td>{row.getFileSizeStart}</td>
-                  <td>{row.getFileSizeEnd}</td>
+                  <td>{formatTime(row.getFileSizeStart)}</td>
+                  <td>{formatTime(row.getFileSizeEnd)}</td>
                   <td>{row.getFileSize || 'Waiting'}</td>
                   <td>{row.fileSize}</td>
-                  <td>{row.getTotalSizeStart}</td>
-                  <td>{row.getTotalSizeEnd}</td>
+                  <td>{formatTime(row.getTotalSizeStart)}</td>
+                  <td>{formatTime(row.getTotalSizeEnd)}</td>
                   <td>{row.getTotalSize || 'Waiting'}</td>
                   <td>{row.totalSize}</td>
                 </tr>
