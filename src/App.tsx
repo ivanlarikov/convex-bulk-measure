@@ -11,7 +11,7 @@ const App = () => {
   const removeAllFiles = useMutation(api.files.removeAll);
   const saveMultiRecords = useMutation(api.files.saveMulti);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
-  const updateStorageId = useMutation(api.files.updateStorageId);
+  const updateStorageId = useAction(api.actions.fileActions.updateStorageId);
   const setJobStart = useAction(api.actions.fileActions.setJobStart);
   const setJobEnd = useAction(api.actions.fileActions.setJobEnd);
 
@@ -104,9 +104,7 @@ const App = () => {
     setStage('addAll');
     // Add new records into table
     const rows = selectedFiles.map(({ file }) => ({
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size
+      fileName: file.name
     }));
     try {
       const newIds = await saveMultiRecords({data: rows});
@@ -121,8 +119,8 @@ const App = () => {
 
   const sendSingleFile = async (f: any) => {
     return new Promise(async (resolve, reject) => {
+      uploadStartedCnt.current++;
       try {
-        uploadStartedCnt.current++;
 
         const { id, file } = f;
 
@@ -136,15 +134,14 @@ const App = () => {
         await setJobEnd({id, jobName: "upload"});
 
         const { storageId } = await result.json();
-        await setJobStart({id, jobName: "updateStorageId"});
         await updateStorageId({ id, storageId });
-        await setJobEnd({id, jobName: "updateStorageId"});
         setUploadedFilesCnt(prev => prev + 1);
 
         uploadFinishedCnt.current++;
         onSingleFileUploaded(storageId);
         resolve(storageId);
       } catch (err) {
+        uploadFinishedCnt.current++;
         reject(err);
       }
     });
@@ -216,32 +213,32 @@ const App = () => {
           <table className="table">
             <thead>
               <tr>
-                <th rowSpan={2}>No</th>
-                <th rowSpan={2}>Created</th>
+                <th rowSpan={2} width="50px">No</th>
+                <th rowSpan={2} width="140px">Created</th>
                 <th rowSpan={2}>FileName</th>
                 <th colSpan={3}>Upload and SaveToStorage</th>
                 <th colSpan={3}>UpdateStorageId</th>
                 <th colSpan={3}>GetFileType</th>
                 <th colSpan={3}>GetFileSize</th>
                 <th colSpan={3}>GetTotalSize</th>
-                <th rowSpan={2}>TotalSize</th>
+                <th rowSpan={2} width="80px">TotalSize</th>
               </tr>
               <tr>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
+                <th width="100px">Start</th>
+                <th width="100px">End</th>
+                <th width="60px">Status</th>
+                <th width="100px">Start</th>
+                <th width="100px">End</th>
+                <th width="60px">Status</th>
+                <th width="100px">Start</th>
+                <th width="100px">End</th>
+                <th width="60px">Status</th>
+                <th width="100px">Start</th>
+                <th width="100px">End</th>
+                <th width="60px">Status</th>
+                <th width="100px">Start</th>
+                <th width="100px">End</th>
+                <th width="60px">Status</th>
               </tr>
             </thead>
             <tbody>

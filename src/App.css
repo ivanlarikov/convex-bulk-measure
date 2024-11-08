@@ -1,5 +1,5 @@
 #root {
-  max-width: 1600px;
+  max-width: 1800px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -65,7 +65,7 @@ input {
 }
 
 .table tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: #efefef;
 }
 
 .table td {

@@ -8,11 +8,25 @@ export const get = query({
   },
 });
 
-export const getTotalCount = query({
+export const getOne = query({
+  args: {
+    id: v.id("files"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});
+
+export const getSizedFiles = query({
   args: {},
   handler: async (ctx) => {
-    const files = await ctx.db.query("files").collect();
-    return files.length;
+    const sizedFiles = await ctx.db
+      .query("files")
+      .filter((q) => {
+        return q.gt(q.field("fileSize"), 0)
+      })
+      .collect();
+    return sizedFiles;
   },
 });
 
@@ -42,8 +56,8 @@ export const saveMulti = mutation({
     data: v.array(v.object({
       storageId: v.optional(v.id("_storage")),
       fileName: v.string(),
-      fileType: v.string(),
-      fileSize: v.number()
+      fileType: v.optional(v.string()),
+      fileSize: v.optional(v.number())
     }))
   },
   handler: async (ctx, args) => {
@@ -68,11 +82,25 @@ export const removeAll = mutation({
     const documents = await ctx.db.query("files").collect();
     for (const doc of documents) {
       if (doc.storageId) {
-        await ctx.storage.delete(doc.storageId);
+        try {
+          await ctx.storage.delete(doc.storageId);
+        } catch (err) {
+          
+        }
       }
       await ctx.db.delete(doc._id);
     }
   },
+});
+
+export const updateRow = mutation({
+  args: {
+    id: v.id("files"),
+    data: v.any()
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, args.data);
+  }
 });
 
 export const setJobStart = mutation({
@@ -86,7 +114,6 @@ export const setJobStart = mutation({
       [args.jobName]: "Running",
       [args.jobName + "Start"]: args.time
     });
-    // await ctx.db.patch(args.id, { storageId: args.storageId });
   },
 });
 
@@ -111,12 +138,11 @@ export const setJobEnd = mutation({
   },
 });
 
-export const updateRow = mutation({
+export const getMetadata = query({
   args: {
-    id: v.id("files"),
-    data: v.any()
+    storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, args.data);
-  }
+    return await ctx.db.system.get(args.storageId);
+  },
 });
