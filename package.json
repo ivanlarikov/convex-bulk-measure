@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@mjackson/multipart-parser": "^0.6.3",
+    "@types/node": "^22.9.0",
     "convex": "^1.17.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

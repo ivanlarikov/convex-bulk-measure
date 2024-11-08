@@ -207,7 +207,73 @@ const App = () => {
         )}
         
         <h1>Total files: {files?.length}</h1>
-        <ul>
+        <div className="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th rowSpan="2">No</th>
+                <th rowSpan="2">Created</th>
+                <th rowSpan="2">FileName</th>
+                <th colSpan="3">Upload</th>
+                <th colSpan="3">SaveToStorage</th>
+                <th colSpan="3">UpdateStorageId</th>
+                <th colSpan="3">GetFileType</th>
+                <th colSpan="3">GetFileSize</th>
+                <th colSpan="3">GetTotalSize</th>
+                <th rowSpan="2">TotalSize</th>
+              </tr>
+              <tr>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {files?.map((row, index) => (
+                <tr>
+                  <td>{index + 1}</td>
+                  <td>{row._creationTime}</td>
+                  <td>{row.fileName}</td>
+                  <td>{row.uploadStart}</td>
+                  <td>{row.uploadEnd}</td>
+                  <td>{row.upload || 'Waiting'}</td>
+                  <td>{row.toStorageStart}</td>
+                  <td>{row.toStorageEnd}</td>
+                  <td>{row.toStorage || 'Waiting'}</td>
+                  <td>{row.updateStorageIdStart}</td>
+                  <td>{row.updateStorageIdEnd}</td>
+                  <td>{row.updateStorageId || 'Waiting'}</td>
+                  <td>{row.getFileTypeStart}</td>
+                  <td>{row.getFileTypeEnd}</td>
+                  <td>{row.getFileType || 'Waiting'}</td>
+                  <td>{row.getFileSizeStart}</td>
+                  <td>{row.getFileSizeEnd}</td>
+                  <td>{row.getFileSize || 'Waiting'}</td>
+                  <td>{row.getTotalSizeStart}</td>
+                  <td>{row.getTotalSizeEnd}</td>
+                  <td>{row.getTotalSize || 'Waiting'}</td>
+                  <td>{row.totalSize}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/*<ul>
           {
             files?.map(({ _id, storageId, fileName, fileType, fileSize }, index) => (
               <li key={_id}>
@@ -216,7 +282,7 @@ const App = () => {
               </li>
             ))
           }
-        </ul>
+        </ul>*/}
       </div>
     </>
   );

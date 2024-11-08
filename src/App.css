@@ -52,3 +52,22 @@ input {
   height: 20px;
   margin-left: 5px;
 }
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #ccc;
+  font-size: 12px;
+}
+
+.table th, .table td {
+  border: 1px solid #ccc;
+}
+
+.table tbody tr:hover {
+  background-color: #efefef;
+}
+
+.table td {
+  height: 25px;
+}
