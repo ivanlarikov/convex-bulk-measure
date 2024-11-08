@@ -135,9 +135,9 @@ const App = () => {
 
         const { storageId } = await result.json();
         await updateStorageId({ id, storageId });
-        setUploadedFilesCnt(prev => prev + 1);
 
         uploadFinishedCnt.current++;
+        setUploadedFilesCnt(uploadFinishedCnt.current);
         onSingleFileUploaded(storageId);
         resolve(storageId);
       } catch (err) {
