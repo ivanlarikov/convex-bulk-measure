@@ -137,7 +137,6 @@ const App = () => {
         await updateStorageId({ id, storageId });
 
         uploadFinishedCnt.current++;
-        console.log('uploadFinishedCnt.current', uploadFinishedCnt.current);
         setUploadedFilesCnt(uploadFinishedCnt.current);
         onSingleFileUploaded(storageId);
         resolve(storageId);
@@ -156,7 +155,6 @@ const App = () => {
       const uploadingCnt = uploadStartedCnt.current - uploadFinishedCnt.current;
       const newReqCnt = CHUNK_PROMISES_CNT - Math.abs(uploadingCnt);
       const sliced = uploadingFiles.current.slice(uploadStartedCnt.current, uploadStartedCnt.current + newReqCnt);
-      console.log('sliced', uploadStartedCnt.current, uploadStartedCnt.current + newReqCnt);
       sliced.forEach(f => sendSingleFile(f));
     }
   }
@@ -223,6 +221,7 @@ const App = () => {
                 <th colSpan={3}>UpdateStorageId</th>
                 <th colSpan={3}>GetFileType</th>
                 <th colSpan={3}>GetFileSize</th>
+                <th rowSpan={2} width="80px">FileSize</th>
                 <th colSpan={3}>GetTotalSize</th>
                 <th rowSpan={2} width="80px">TotalSize</th>
               </tr>
@@ -262,6 +261,7 @@ const App = () => {
                   <td>{row.getFileSizeStart}</td>
                   <td>{row.getFileSizeEnd}</td>
                   <td>{row.getFileSize || 'Waiting'}</td>
+                  <td>{row.fileSize}</td>
                   <td>{row.getTotalSizeStart}</td>
                   <td>{row.getTotalSizeEnd}</td>
                   <td>{row.getTotalSize || 'Waiting'}</td>
